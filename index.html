@@ -3,7 +3,6 @@
 <head>
   <title>Duit Raya 2026</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
   <style>
     body {
       margin: 0;
@@ -11,112 +10,103 @@
       background: url('background.png') no-repeat center center fixed;
       background-size: cover;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      overflow: hidden;
-      color: white;
-    }
-
-    .container {
       text-align: center;
-      z-index: 10;
+      color: white;
+      overflow: hidden;
       position: relative;
     }
 
-    h1 {
-      font-size: 32px;
-      margin-bottom: 40px;
-      text-shadow: 0 0 20px gold;
-    }
-
-    .envelope {
-      width: 200px;
-      height: 130px;
-      background: linear-gradient(145deg, #b71c1c, #8e0000);
-      margin: auto;
-      border-radius: 10px;
-      position: relative;
+    #claimBtn {
+      padding: 25px 50px;
+      font-size: 24px;
+      background: #ffdd59;
+      border: none;
+      border-radius: 15px;
+      color: black;
+      font-weight: bold;
       cursor: pointer;
-      box-shadow: 0 0 40px rgba(255,215,0,0.6);
-      transform-style: preserve-3d;
-      transition: transform 1s;
+      box-shadow: 0 0 25px #FFD700;
+      animation: glowPulse 1.5s ease-in-out infinite, bounce 1.2s infinite;
+      z-index: 1;
+      position: relative;
     }
 
-    .envelope:before {
-      content: "";
-      position: absolute;
-      top: -65px;
-      left: 0;
-      width: 0;
-      height: 0;
-      border-left: 100px solid transparent;
-      border-right: 100px solid transparent;
-      border-bottom: 65px solid #a00000;
-      transition: transform 1s;
-      transform-origin: bottom;
+    @keyframes glowPulse {
+      0% { box-shadow: 0 0 20px #FFD700; }
+      50% { box-shadow: 0 0 40px #FFD700; }
+      100% { box-shadow: 0 0 20px #FFD700; }
     }
 
-    .envelope.open {
-      transform: rotateX(180deg);
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
     }
 
-    .envelope.open:before {
-      transform: rotateX(180deg);
+    .bottom-text {
+      margin-top: 20px;
+      max-width: 500px;
+      font-size: 16px;
+      color: #fff;
+      text-shadow: 0 0 5px black;
+      z-index: 1;
+      position: relative;
     }
 
     .modal {
       display: none;
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       background: rgba(0,0,0,0.7);
       justify-content: center;
       align-items: center;
-      z-index: 20;
+      z-index: 2;
     }
 
     .modal-content {
-      background: white;
+      background: #ffeaa7;
       color: black;
-      padding: 40px;
-      border-radius: 20px;
+      padding: 50px;
+      border-radius: 25px;
       text-align: center;
-      animation: pop 0.4s ease;
+      font-size: 26px;
+      font-weight: bold;
+      animation: slideBounce 0.6s ease forwards;
+      box-shadow: 0 5px 25px rgba(0,0,0,0.3);
     }
 
-    @keyframes pop {
-      from { transform: scale(0.5); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
+    @keyframes slideBounce {
+      0% { transform: translateY(-200px) scale(0.5); opacity: 0; }
+      60% { transform: translateY(20px) scale(1.05); opacity: 1; }
+      100% { transform: translateY(0) scale(1); opacity: 1; }
     }
 
     .money {
       position: absolute;
-      width: 40px;
+      font-size: 32px;
       animation: moneyFall 2s ease forwards;
     }
 
     @keyframes moneyFall {
       0% { transform: translateY(0) scale(1); opacity: 1; }
-      100% { transform: translateY(300px) rotate(360deg) scale(1.2); opacity: 0; }
+      100% { transform: translateY(300px) rotate(360deg) scale(1.3); opacity: 0; }
     }
-
   </style>
 </head>
-
 <body>
 
-<div class="container">
-  <h1>🧧 Klik Sampul Untuk Duit Raya 🧧</h1>
-  <div class="envelope" id="envelope"></div>
+<button id="claimBtn">Klik Untuk Dapat Duit Raya 🎉</button>
+
+<div class="bottom-text">
+  Dah ready ke untuk merasai kegembiraan Raya tahun ini? Pastikan anda klik butang di atas untuk melihat berapa banyak duit raya yang anda dapat, dan raikan detik manis ini bersama keluarga serta orang tersayang!
 </div>
 
 <div class="modal" id="popup">
-  <div class="modal-content">
-    <h2 id="resultText"></h2>
-  </div>
+  <div class="modal-content" id="resultText"></div>
 </div>
 
 <audio id="bgmusic" loop>
@@ -126,59 +116,37 @@
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
+const claimBtn = document.getElementById("claimBtn");
+const popup = document.getElementById("popup");
+const resultText = document.getElementById("resultText");
+const music = document.getElementById("bgmusic");
 
-  const envelope = document.getElementById("envelope");
-  const popup = document.getElementById("popup");
-  const resultText = document.getElementById("resultText");
-  const music = document.getElementById("bgmusic");
+claimBtn.addEventListener("click", function() {
+  const amounts = [5,5,5,10,10,20,50,100];
+  const random = amounts[Math.floor(Math.random() * amounts.length)];
+  resultText.innerHTML = `🎉 Tahniah! Anda dapat RM${random} 🎊<br>Selamat Hari Raya Aidilfitri! Maaf Zahir & Batin 🌙`;
 
-  if (localStorage.getItem("claimed")) {
-    envelope.style.opacity = "0.5";
-    envelope.style.cursor = "not-allowed";
+  popup.style.display = "flex";
+
+  // Confetti
+  confetti({ particleCount: 400, spread: 180, origin: { y: 0.6 }, colors: ['#FFD700','#FF4500','#32CD32','#00BFFF','#FF69B4','#ADFF2F'] });
+
+  // Duit jatuh dari button
+  for (let i = 0; i < 20; i++) {
+    let money = document.createElement("div");
+    money.className = "money";
+    money.innerHTML = "💵";
+    const rect = claimBtn.getBoundingClientRect();
+    money.style.left = rect.left + Math.random()*rect.width + "px";
+    money.style.top = rect.top + "px";
+    document.body.appendChild(money);
+    setTimeout(() => money.remove(), 2000);
   }
 
-  envelope.addEventListener("click", function() {
-
-    if (localStorage.getItem("claimed")) return;
-
-    // Open envelope animation
-    envelope.classList.add("open");
-
-    // Play music
-    music.volume = 1;
+  if (music.paused) {
+    music.volume = 0.7;
     music.play();
-
-    // Random amount
-    const amounts = [5,5,5,10,10,20,50,100];
-    const random = amounts[Math.floor(Math.random() * amounts.length)];
-
-    // Show popup after envelope opens
-    setTimeout(() => {
-      popup.style.display = "flex";
-      resultText.innerHTML = "🎉 Tahniah! Anda dapat RM" + random + " 🎊";
-    }, 1000);
-
-    // Confetti
-    confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
-
-    // Animate some money falling
-    for (let i = 0; i < 5; i++) {
-      let money = document.createElement("div");
-      money.className = "money";
-      money.innerHTML = "💵";
-      money.style.left = Math.random() * window.innerWidth + "px";
-      money.style.top = "0px";
-      document.body.appendChild(money);
-      setTimeout(() => money.remove(), 2000);
-    }
-
-    localStorage.setItem("claimed", "yes");
-    envelope.style.opacity = "0.5";
-    envelope.style.cursor = "not-allowed";
-
-  });
-
+  }
 });
 </script>
 
