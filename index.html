@@ -7,59 +7,64 @@
   <style>
     body {
       margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #0f9b0f, #006400);
+      font-family: 'Poppins', sans-serif;
+      background: radial-gradient(circle at top, #1b5e20, #004d00);
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      text-align: center;
       color: white;
+      overflow: hidden;
     }
 
-    .card {
-      background: rgba(255,255,255,0.1);
-      padding: 40px;
-      border-radius: 20px;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    .container {
+      text-align: center;
     }
 
     h1 {
-      margin-bottom: 30px;
+      font-size: 28px;
+      margin-bottom: 40px;
+      text-shadow: 0 0 20px gold;
     }
 
-    button {
-      padding: 15px 30px;
-      font-size: 18px;
-      border: none;
-      border-radius: 50px;
-      background: gold;
-      color: black;
+    .envelope {
+      width: 200px;
+      height: 130px;
+      background: linear-gradient(145deg, #b71c1c, #8e0000);
+      margin: auto;
+      border-radius: 10px;
+      position: relative;
       cursor: pointer;
-      font-weight: bold;
-      transition: 0.3s;
+      transition: 0.5s;
+      box-shadow: 0 0 30px rgba(255,215,0,0.6);
     }
 
-    button:hover {
-      transform: scale(1.05);
-    }
-
-    button:disabled {
-      background: grey;
-      cursor: not-allowed;
-    }
-
-    /* POPUP */
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 999;
+    .envelope:before {
+      content: "";
+      position: absolute;
+      top: -65px;
       left: 0;
+      width: 0;
+      height: 0;
+      border-left: 100px solid transparent;
+      border-right: 100px solid transparent;
+      border-bottom: 65px solid #a00000;
+      transition: 0.5s;
+    }
+
+    .open:before {
+      transform: rotateX(180deg);
+      top: -10px;
+    }
+
+    .modal {
+      position: fixed;
       top: 0;
+      left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0,0,0,0.6);
+      background: rgba(0,0,0,0.7);
+      display: none;
       justify-content: center;
       align-items: center;
     }
@@ -70,66 +75,108 @@
       padding: 40px;
       border-radius: 20px;
       text-align: center;
-      animation: popup 0.4s ease;
+      animation: pop 0.4s ease;
     }
 
-    @keyframes popup {
+    @keyframes pop {
       from { transform: scale(0.5); opacity: 0; }
       to { transform: scale(1); opacity: 1; }
     }
+
+    .music-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: gold;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
   </style>
 </head>
 
 <body>
 
-  <div class="card">
-    <h1>🎉 Duit Raya Digital 🎉</h1>
-    <button id="claimBtn" onclick="giveReward()">Scan & Dapat Duit Raya</button>
+<div class="container">
+  <h1>🧧 Klik Sampul Untuk Duit Raya 🧧</h1>
+  <div class="envelope" id="envelope" onclick="claimDuit()"></div>
+</div>
+
+<button class="music-btn" onclick="toggleMusic()">🔊 Music</button>
+
+<div class="modal" id="popup">
+  <div class="modal-content">
+    <h2 id="resultText"></h2>
   </div>
+</div>
 
-  <!-- POPUP -->
-  <div id="popup" class="modal">
-    <div class="modal-content">
-      <h2 id="resultText"></h2>
-    </div>
-  </div>
+<audio id="bgmusic" loop>
+  <source src="laguraya.mp3" type="audio/mpeg">
+</audio>
 
-  <!-- Confetti Script -->
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-  <script>
-    function giveReward() {
+<script>
 
-      // Prevent second click
-      if (localStorage.getItem("claimed")) {
-        return;
+let musicStarted = false;
+
+function claimDuit() {
+
+  if (localStorage.getItem("claimed")) {
+    return;
+  }
+
+  const amounts = [5,5,5,10,10,20,50,100];
+  const random = amounts[Math.floor(Math.random() * amounts.length)];
+
+  document.getElementById("envelope").classList.add("open");
+
+  // Start music with fade in
+  if (!musicStarted) {
+    const music = document.getElementById("bgmusic");
+    music.volume = 0;
+    music.play();
+    musicStarted = true;
+
+    let fade = setInterval(() => {
+      if (music.volume < 1) {
+        music.volume += 0.05;
+      } else {
+        clearInterval(fade);
       }
+    }, 200);
+  }
 
-      const amounts = [5,5,5,10,10,20,50];
-      const random = amounts[Math.floor(Math.random() * amounts.length)];
+  setTimeout(() => {
+    document.getElementById("popup").style.display = "flex";
+    document.getElementById("resultText").innerHTML =
+      "🎉 Tahniah! Anda dapat RM" + random + " 🎊";
 
-      document.getElementById("resultText").innerHTML =
-        "🎊 Tahniah! Anda dapat RM" + random + " 🎁";
+    confetti({
+      particleCount: 200,
+      spread: 100,
+      origin: { y: 0.6 }
+    });
 
-      document.getElementById("popup").style.display = "flex";
-      document.getElementById("claimBtn").disabled = true;
+  }, 600);
 
-      // Save so tak boleh tekan lagi
-      localStorage.setItem("claimed", "yes");
+  localStorage.setItem("claimed", "yes");
+}
 
-      // Confetti effect
-      confetti({
-        particleCount: 150,
-        spread: 70,
-        origin: { y: 0.6 }
-      });
-    }
+function toggleMusic() {
+  const music = document.getElementById("bgmusic");
 
-    // Kalau dah pernah claim sebelum ni
-    if (localStorage.getItem("claimed")) {
-      document.getElementById("claimBtn").disabled = true;
-    }
-  </script>
+  if (music.paused) {
+    music.play();
+  } else {
+    music.pause();
+  }
+}
+
+</script>
 
 </body>
 </html>
